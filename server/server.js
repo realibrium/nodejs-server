@@ -27,15 +27,17 @@ var app = express();
 
 //####################################################################
 //####################################################################
-// Use middleware to get the body data sent from the client
-// Parse it as JSON and attach it to an object called request (req) in the body
+// Use middleware to get the body data sent from the client with a POST
+// Parse it as JSON and attach it to the request object of "app".
+//This will be denoted as "request.body"
 app.use(bodyParser.json());
 //####################################################################
 //####################################################################
 
 //####################################################################
 //####################################################################
-// POST Route which allows us to create new todos
+// POST Route which allows us to create new todos.
+// Called Resource Creation
 app.post('/todos', (req, res) => {
   // Create new todo and set the text from req.body.text property
   var todo = new Todo({

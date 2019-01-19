@@ -7,6 +7,9 @@ var express = require('express');
 // load body-parser
 var bodyParser = require('body-parser');
 
+// load ObjectID from mongodb library
+var {ObjectID} = require('mongodb');
+
 // load the mongoose from exports from ./db/mongoose.js
 var {mongosse} = require('./db/mongoose.js');
 
@@ -67,6 +70,43 @@ app.get('/todos', (req, res) => {
     res.status(400).send(error);
   });
 });
+
+//####################################################################
+//####################################################################
+
+//####################################################################
+//####################################################################
+// GET Route, allow us to read and list a todo with an id variable in the Route
+// the /todos/:id creates a paramter with a key-value pair for id
+app.get('/todos/:id', (req, res) => {
+  var id = req.params.id;
+
+  //Validate the id using isValid
+  if (!ObjectID.isValid(id)) {
+    //Respond with a 404 - send an empty body
+    return res.status(404).send();
+  }
+
+  // findById
+  Todo.findById(id).then((todo) => {
+    //success
+      //if not todo - send back 404 with empty body
+      if (!todo) {
+        return res.status(404).send();
+      }
+      //if todo - send it back as an object so that other properties such as status can be sent
+      res.send({todo: todo});
+
+  }).catch((error) => {
+    //Error
+      //Send 400 - and send empty body back or the error
+      res.status(400).send(error);
+  });
+
+
+
+});
+
 
 //####################################################################
 //####################################################################

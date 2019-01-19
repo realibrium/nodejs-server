@@ -46,7 +46,7 @@ app.post('/todos', (req, res) => {
 
   //Save the model to the database
   todo.save().then((doc) => {
-    // responde with the document
+    // if save is successful then responde with the document
     res.send(doc);
   }, (error) => {
     // If error then send back a status of 400 with the error
@@ -58,7 +58,15 @@ app.post('/todos', (req, res) => {
 
 //####################################################################
 //####################################################################
-// GET Route, allows us to read todos
+// GET Route, allows us to read and list todos
+app.get('/todos', (req, res) => {
+  Todo.find().then((todosArray) => {
+    //Send back an object with the todos array
+    res.send({todosArray});
+  }, (error) => {
+    res.status(400).send(error);
+  });
+});
 
 //####################################################################
 //####################################################################

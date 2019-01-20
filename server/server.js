@@ -51,9 +51,9 @@ app.post('/todos', (req, res) => {
   });
 
   //Save the model to the database
-  todo.save().then((doc) => {
-    // if save is successful then responde with the document
-    res.send(doc);
+  todo.save().then((createdTodo) => {
+    // if save is successful then send status 200 and send the document
+    res.status(200).send({createdTodo});
   }, (error) => {
     // If error then send back a status of 400 with the error
     res.status(400).send(error);
@@ -64,11 +64,11 @@ app.post('/todos', (req, res) => {
 
 //####################################################################
 //####################################################################
-// GET Route, allows us to read and list todos
+// GET Route, allows us to read and list found todos Array
 app.get('/todos', (req, res) => {
-  Todo.find().then((todosArray) => {
+  Todo.find().then((foundTodosArray) => {
     //Send back an object with the todos array
-    res.send({todosArray});
+    res.status(200).send({foundTodosArray});
   }, (error) => {
     res.status(400).send(error);
   });
@@ -82,23 +82,24 @@ app.get('/todos', (req, res) => {
 // GET Route, allow us to read and list a todo with an id variable in the Route
 // the /todos/:id creates a paramter with a key-value pair for id
 app.get('/todos/:id', (req, res) => {
+  //Get id parameter passed on http string
   var id = req.params.id;
 
   //Validate the id using isValid
   if (!ObjectID.isValid(id)) {
     //Respond with a 404 - send an empty body
     return res.status(404).send();
-  }
+  };
 
   // findById
-  Todo.findById(id).then((todo) => {
+  Todo.findById(id).then((foundTodoById) => {
     //success
       //if not todo - send back 404 with empty body
-      if (!todo) {
+      if (!foundTodoById) {
         return res.status(404).send();
       }
       //if todo - send it back as an object so that other properties such as status can be sent
-      res.send({todo: todo});
+      res.status(200).send({foundTodoById: foundTodoById});
 
   }).catch((error) => {
     //Error
@@ -107,6 +108,53 @@ app.get('/todos/:id', (req, res) => {
   });
 });
 
+//####################################################################
+//####################################################################
+
+//####################################################################
+//####################################################################
+// DELETE Route, allow us to delete:
+// remove all todos with Todo.remove({})
+    // Todo.remove({}).then((result) => {
+    //   console.log(result);
+    // });
+
+// find one and remove the first todo that matches a query
+    // Todo.findOneAndRemove({_id: '5c44cbc2ca2bef865258d7cb'}).then((todoRemoved) => {
+    //   console.log("Removed: ", todoRemoved);
+    // });
+
+// Find by id and findOneAndRemove
+    // Todo.findByIdAndRemove('5c44cbc2ca2bef865258d7cb').then((todoRemoved) => {
+    //   console.log("Removed: ", todoRemoved);
+    // });
+app.delete('/todos/:id', (req, res) => {
+  //Get id parameter passed on http string
+  var id = req.params.id;
+
+  //Validate the id using isValid
+  if (!ObjectID.isValid(id)) {
+    //Respond with a 404 - send an empty body
+    return res.status(404).send();
+  };
+
+  // find by Id and Remove
+  Todo.findByIdAndRemove(id).then((todoRemoved) => {
+    //success
+      //If Not todoRemoved send a status 404
+      if (!todoRemoved) {
+        return res.status(404).send();
+      }
+      //If todoRemoved send status 200 and send it back as an ObjectID
+      res.status(200).send({todoRemoved: todoRemoved});
+
+    //If Error
+  }).catch((error) => {
+    //Error
+      //Send 400 - and send empty body back or the error
+      res.status(400).send(error);
+  });
+});
 
 //####################################################################
 //####################################################################

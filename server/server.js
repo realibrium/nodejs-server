@@ -53,7 +53,7 @@ app.post('/todos', (req, res) => {
   //Save the model to the database
   todo.save().then((createdTodo) => {
     // if save is successful then send status 200 and send the document
-    res.status(200).send({createdTodo});
+    res.status(200).send({createdTodo: createdTodo});
   }, (error) => {
     // If error then send back a status of 400 with the error
     res.status(400).send(error);
@@ -68,7 +68,7 @@ app.post('/todos', (req, res) => {
 app.get('/todos', (req, res) => {
   Todo.find().then((foundTodosArray) => {
     //Send back an object with the todos array
-    res.status(200).send({foundTodosArray});
+    res.status(200).send({foundTodosArray: foundTodosArray});
   }, (error) => {
     res.status(400).send(error);
   });

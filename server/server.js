@@ -1,16 +1,34 @@
 //####################################################################
 //####################################################################
-//
-// load express
+// Begin: Load NMP Modules
+//####################################################################
+//####################################################################
+
+// Load lodash
+var _ = require('lodash');
+
+// Load express
 var express = require('express');
 
-// load body-parser
+// Load body-parser
 var bodyParser = require('body-parser');
 
-// load ObjectID from mongodb library
+// Load ObjectID from mongodb library
 var {ObjectID} = require('mongodb');
 
-// load the mongoose from exports from ./db/mongoose.js
+//####################################################################
+//####################################################################
+// End: Load NMP Modules
+//####################################################################
+//####################################################################
+
+//####################################################################
+//####################################################################
+// Begin: Load Project Methods
+//####################################################################
+//####################################################################
+
+// Load the mongoose from exports from ./db/mongoose.js
 var {mongosse} = require('./db/mongoose.js');
 
 // Load the Todo model
@@ -18,6 +36,10 @@ var {Todo} = require('./models/todo.js');
 
 // Load the User  model
 var {User} = require('./models/user.js');
+
+//####################################################################
+//####################################################################
+// End: Load Project Methods
 //####################################################################
 //####################################################################
 
@@ -42,8 +64,12 @@ app.use(bodyParser.json());
 
 //####################################################################
 //####################################################################
-// POST Route which allows us to create new todos.
+// Begin: POST Route
+// Allows us to create new todos.
 // Called Resource Creation
+//####################################################################
+//####################################################################
+
 app.post('/todos', (req, res) => {
   // Create new todo and set the text from req.body.text property
   var todo = new Todo({
@@ -59,12 +85,20 @@ app.post('/todos', (req, res) => {
     res.status(400).send(error);
   });
 });
+
+//####################################################################
+//####################################################################
+// End: POST Route
 //####################################################################
 //####################################################################
 
 //####################################################################
 //####################################################################
-// GET Route, allows us to read and list found todos Array
+// Begin: GET Route
+// Allows us to read and list found todos Array
+//####################################################################
+//####################################################################
+
 app.get('/todos', (req, res) => {
   Todo.find().then((foundTodosArray) => {
     //Send back an object with the todos array
@@ -76,11 +110,18 @@ app.get('/todos', (req, res) => {
 
 //####################################################################
 //####################################################################
+// End: GET Route
+//####################################################################
+//####################################################################
 
 //####################################################################
 //####################################################################
-// GET Route, allow us to read and list a todo with an id variable in the Route
+// Begin: GET Route with id
+// Allow us to read and list a todo with an id variable in the Route
 // the /todos/:id creates a paramter with a key-value pair for id
+//####################################################################
+//####################################################################
+
 app.get('/todos/:id', (req, res) => {
   //Get id parameter passed on http string
   var id = req.params.id;
@@ -110,24 +151,18 @@ app.get('/todos/:id', (req, res) => {
 
 //####################################################################
 //####################################################################
+// End: GET Route with id
+//####################################################################
+//####################################################################
 
 //####################################################################
 //####################################################################
-// DELETE Route, allow us to delete:
-// remove all todos with Todo.remove({})
-    // Todo.remove({}).then((result) => {
-    //   console.log(result);
-    // });
+// Begin: DELETE Route
+// allow us to delete a specific doc by id:
+// Find by id and remove
+//####################################################################
+//####################################################################
 
-// find one and remove the first todo that matches a query
-    // Todo.findOneAndRemove({_id: '5c44cbc2ca2bef865258d7cb'}).then((todoRemoved) => {
-    //   console.log("Removed: ", todoRemoved);
-    // });
-
-// Find by id and findOneAndRemove
-    // Todo.findByIdAndRemove('5c44cbc2ca2bef865258d7cb').then((todoRemoved) => {
-    //   console.log("Removed: ", todoRemoved);
-    // });
 app.delete('/todos/:id', (req, res) => {
   //Get id parameter passed on http string
   var id = req.params.id;
@@ -156,6 +191,63 @@ app.delete('/todos/:id', (req, res) => {
   });
 });
 
+//####################################################################
+//####################################################################
+// End: DELETE Route
+//####################################################################
+//####################################################################
+
+//####################################################################
+//####################################################################
+// Begin: UPDATE Route
+// Allows us to update a specific doc by id:
+//####################################################################
+//####################################################################
+
+app.patch('/todos/:id', (req, res) => {
+  //Get id parameter passed on http string
+  var id = req.params.id;
+
+  // Get the body using the pick() method from loadash.
+  // This allow us to filter the only properties that the user
+  // is allowed to update: 'text' and 'completed'
+  var body = _.pick(req.body, ['text', 'completed']);
+
+  //Validate the id using isValid
+  if (!ObjectID.isValid(id)) {
+    //Respond with a 404 - send an empty body
+    return res.status(404).send();
+  };
+
+  // Check if todo is completed
+  if (_.isBoolean(body.completed) && body.completed) {
+    // Use getTime() to set the 'completedAt' field
+    // getTime() yields the number of miliseconds since midnight Jan 1, 1970
+    body.completedAt = new Date().getTime();
+  } else {
+    body.completed = false;
+    body.completedAt = null
+  };
+
+  //Now find the document by id and update it.
+  Todo.findByIdAndUpdate(id, {$set: body}, {new: true}).then((todoUpdated) => {
+
+    // If todoUpdated does not exist send a 404 and return skipping the remining steps
+    if(!todoUpdated) {
+      return res.status(404).send();
+    }
+
+    //If todoUpdated exist
+    res.status(200).send({todoUpdated});
+  }).catch((error) => {
+    res.status(400).send();
+  });
+
+});
+
+//####################################################################
+//####################################################################
+// End: UPDATE Route
 //####################################################################
 //####################################################################
 

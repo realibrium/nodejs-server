@@ -76,7 +76,7 @@ app.post('/todos', (req, res) => {
     text: req.body.text
   });
 
-  //Save the model to the database
+  //Save the todo model to the database
   todo.save().then((createdTodo) => {
     // if save is successful then send status 200 and send the document
     res.status(200).send({createdTodo: createdTodo});
@@ -250,6 +250,52 @@ app.patch('/todos/:id', (req, res) => {
 // End: UPDATE Route
 //####################################################################
 //####################################################################
+
+//####################################################################
+//####################################################################
+// Begin: POST Route
+// Allows us to create new users.
+//####################################################################
+//####################################################################
+
+app.post('/users', (req, res) => {
+  // Get the body using the pick() method from loadash.
+  // This allow us to filter the only properties that the user
+  // is allowed to update: 'text' and 'completed'
+  var body = _.pick(req.body, ['email', 'password']);
+
+  // Create new user and set the req.body.email and password properties
+  var user = new User({
+    email: req.body.email,
+    password: req.body.password
+  });
+
+  // Save the user model to the database
+  user.save().then((createdUser) => {
+    // if save is successful then send status 200 and send the document
+    // res.status(200).send({createdUser: createdUser}); --Replaced ..
+    console.log(`Created User: ${createdUser}`);
+
+    return user.generateAuthToken();
+
+  }).then((token) => {
+    console.log(`Token: ${token}`);
+    console.log(`Outside user: ${user}`);
+
+    // The UserSchema.methods.toJSON will control what is sent with send(user)
+    res.header('x-auth', token).send(user);
+  }).catch((error) => {
+    // If error then send back a status of 400 with the error
+    res.status(400).send(error);
+  });
+});
+//####################################################################
+//####################################################################
+// End: POST Route
+// Allows us to create new users.
+//####################################################################
+//####################################################################
+
 
 //####################################################################
 //####################################################################
